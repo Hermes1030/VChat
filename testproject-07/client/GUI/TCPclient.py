@@ -1,3 +1,5 @@
+import threading
+
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -40,7 +42,7 @@ class TCPclient(QWidget):
         # self.message2.setInputMask('000.000.000.000;')
         self.message2.setFont(QFont('微软雅黑', 11))
         self.message2.setGeometry(590, 60, 160, 25)
-        self.list1 = [ '默认', '0.0.0.0', '127.0.0.2', '127.0.0.1' ]
+        self.list1 = ['0.0.0.0', '127.0.0.2', '127.0.0.1' ]
         self.IP = QCompleter(self.list1)
         self.message2.setCompleter(self.IP)
         #  用户列表框
@@ -75,6 +77,7 @@ class TCPclient(QWidget):
         self.button3.setFont(QFont('微软雅黑', 10, ))
         self.button3.setGeometry(590, 90, 80, 25)
         self.button3.setStyleSheet('border:1px solid black')
+        self.button3.clicked.connect(self.connectToserver)
         #  断开按钮
         self.button4 = QPushButton('断开', self)
         self.button4.setFont(QFont('微软雅黑', 10, ))
@@ -95,8 +98,79 @@ class TCPclient(QWidget):
             self.setFixedWidth(581)
             self.I = 1
 
+    def connectToserver(self):
+        if len(self.lable2.text()) <= 7:
+            IP = self.message2.text()
+            PORT = 8899
+            try:
+                self.client = socket.socket()
+                self.client.connect((IP, PORT))
+            except Exception as error:
+                self.content1.append(f'服务器可能未开始，请重试...\n错误描述：{error}')
+                self.content1.moveCursor(self.content1.textCursor().End)
+            else:
+                self.content1.clear()
+                self.lable2.setText(f'服务器地址：{IP}')
+                self.work_thread()
+        else:
+            if '当前已经连接到' not in self.content1.toPlainText():
+                self.content1.append(f'当前已经连接到{self.message2.text()}')
+
+    def closeWithserver(self):
+        try:
+            self.client.close()
+            self.lable1.setText('当前在线人数：0')
+            self.lable2.setText('服务器地址：')
+            self.content1.clear()
+            self.qList.clear()
+            self.data.setStringList(self.qList)
+            self.list.setModel(self.data)
+        except Exception as error:
+            self.content1.append(f'当前未连接到服务器...\n错误描述：{error}')
+            self.content1.moveCursor(self.content1.textCursor().End)
+
+    def recvMsg(self):
+        while True:
+            time.sleep(0.1)
+            try:
+                data = self.client.recv(1024).decode() + '\n'
+                self.content1.append(data)
+            except Exception as error:
+                self.content1.append(f'与服务器断开连接...\n{error}')
+                break
+
+    def sendMsg(self):
+        data = self.message1.text()
+        if self.lable2.text() != '服务器地址：':
+            if data == '#quit':
+                try:
+                    self.client.send(data.encode())
+                except Exception as error:
+                    self.content1.append(f'消息发送失败{error}')
+                else:
+                    self.closeWithserver()
+            else:
+                try:
+                    self.client.send(data.encode())
+                except Exception as error:
+                    self.content1.append(f'消息发送失败，错误信息{error}')
+                    self.closeWithserver()
+            self.message1.clear()
+
+    def work_thread(self):
+        Thread(target=self.close_btn).start()
+        Thread(target=self.send_btn).start()
+        Thread(target=self.recvMsg).start()
+
+    def close_btn(self):
+        self.button4.clicked.connect(self.closeWithserver)
+
+    def send_btn(self):
+        self.button5.clicked.connect(self.sendMsg)
+
     # 主窗体关闭进程终止
     def closeEvent(self, event):
+        self.closeWithserver()
         sys.exit(app.exec_())
 
 if __name__ == '__main__':

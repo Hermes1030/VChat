@@ -143,13 +143,9 @@ class TCPclient(QWidget):
     #  处理发送消息
     def send_msg(self):
         msg = self.message.text()
-        if msg.upper() == '#CLEAR':
-            self.content.clear()
-        else:
-            time.sleep(0.1)
-            if self.lable2.text() != '服务器地址：':
-                self.client.send(msg.encode())
-        if msg.upper() == '#QUIT':
+        if self.lable2.text() != '服务器地址：':
+            self.client.send(msg.encode())
+        if msg.upper() == 'QUIT':
             self.client.close()
             self.destroy()
             sys.exit(0)  # 退出进程
@@ -161,23 +157,8 @@ class TCPclient(QWidget):
         while True:
             time.sleep(0.1)
             try:
-                data = self.client.recv(1024).decode()
-                # s = ''
-                #  窗体标题[用户名]加载槽
-                # if '欢迎' in data:
-                #     for i in data[ 18:: ]:
-                #         s = s + i
-                #         if i == '加':
-                #             break
-                #     self.setWindowTitle(f'多人聊天室（当前用户名：{s[ :-1 ]}）')
-                #  标签[在线人数]槽
-                # if 'userdata:' in data:
-                #     num = data[ 9 ]
-                #     self.lable.setText(f'当前在线人数：{num}')
-                    # self.user_list(num, data)
-                #  消息窗口[消息]槽
-                # else:
-                data = data + '\n'
+                data = self.client.recv(1024).decode() + '\n'
+                # data = data + '\n'
                 self.content.append(data)  # 将收到的消息显示到消息框
                 #  始终显示最后一行
                 self.content.moveCursor(self.content.textCursor().End)
@@ -186,28 +167,6 @@ class TCPclient(QWidget):
                 self.close_connect()
                 self.content.moveCursor(self.content.textCursor().End)
                 break
-
-    # def user_list(self, num, data):
-    #     self.qList = [ ]
-    #     users = [ ]
-    #     user = ' '
-    #     for i in data[ ::-1 ]:
-    #         user += i
-    #         if i == '|':
-    #             users.append(user[ -2:0:-1 ])
-    #             user = ' '
-    #     print(users)
-    #     time.sleep(0.1)
-    #     if len(self.qList) == 1:
-    #         for i1 in users[1::]:
-    #             self.qList.append(i1)
-    #             self.data.setStringList(self.qList)
-    #             self.list.setModel(self.data)
-    #     if len(self.qList) > 1:
-    #         if self.qList[1] != users[1]:
-    #             self.qList.append(users[1])
-    #             self.data.setStringList(self.qList)
-    #             self.list.setModel(self.data)
 
     #  发送按钮单机事件
     def btn_send(self):

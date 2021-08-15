@@ -20,5 +20,21 @@ def make_key(self):
         key += i
     return key
 
-    #  保存聊天记录
-    #  保存日志
+def delete_info(clients_socket, clients_name_ip, address, client):
+    if client in clients_socket:
+        clients_socket.remove(client)
+    if address in clients_name_ip:
+        clients_name_ip.pop(address)
+    try:
+        client.close()
+    except Exception as error:
+        print(f'套接字关闭失败[{error}]')
+
+    return clients_socket, clients_name_ip
+
+
+
+
+
+#  保存聊天记录
+#  保存日志
