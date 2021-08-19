@@ -29,19 +29,19 @@
 #
 #
 # #  userdata:1| 高IP:127.0.0.1:49606|高IP:127.0.0.1:49605|高IP:127.0.0.1:49604|高IP:127.0.0.1:49603|
-user_list = []
-data = 'userdata:2|eeeIP:127.0.0.1:56799|wwwIP:127.0.0.1:56800|aaaIP:127.0.0.1:56801|bbbIP:127.0.0.1:56802|'
-user = ''
-num = 0
-for i in data[::-1]:
-    user += i
-    if i == '|':
-        print(user[-2::-1])
-        user_list.append(user[-2:0:-1])
-        user = ' '
-print(user_list[::])
-i = len(user_list)
-print(i,type(i))
+# user_list = []
+# data = 'userdata:2|eeeIP:127.0.0.1:56799|wwwIP:127.0.0.1:56800|aaaIP:127.0.0.1:56801|bbbIP:127.0.0.1:56802|'
+# user = ''
+# num = 0
+# for i in data[::-1]:
+#     user += i
+#     if i == '|':
+#         print(user[-2::-1])
+#         user_list.append(user[-2:0:-1])
+#         user = ' '
+# print(user_list[::])
+# i = len(user_list)
+# print(i,type(i))
 # print('user倒序：', user)
 # for i in user_list:
 #     print(i)
@@ -112,5 +112,7 @@ print(i,type(i))
 
 
 
-
+testlist = '在线人数5'
+# print(testlist[::-1])
+print(testlist[4::1])
 

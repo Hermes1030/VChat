@@ -1,5 +1,3 @@
-import threading
-
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -21,6 +19,7 @@ class TCPclient(QWidget):
         # 调用方法
         self.change_gui()
         self.add_gui()
+
 
     def add_gui(self):
         #  消息框
@@ -60,7 +59,7 @@ class TCPclient(QWidget):
         self.message1.setGeometry(10, 320, 560, 85)
         self.message1.setFont(QFont('微软雅黑', 14))
         self.message1.setAlignment(Qt.AlignTop)
-        # self.message.returnPressed.connect(self.send_msg)             # 回车触发
+        self.message1.returnPressed.connect(self.sendMsg)             # 回车触发
         #  清屏按钮
         self.button1 = QPushButton('清屏', self)
         self.button1.setFont(QFont('微软雅黑', 10, ))
@@ -112,6 +111,7 @@ class TCPclient(QWidget):
                 self.content1.clear()
                 self.lable2.setText(f'服务器地址：{IP}')
                 self.work_thread()
+
         else:
             if '当前已经连接到' not in self.content1.toPlainText():
                 self.content1.append(f'当前已经连接到{self.message2.text()}')
@@ -134,9 +134,15 @@ class TCPclient(QWidget):
             time.sleep(0.1)
             try:
                 data = self.client.recv(1024).decode() + '\n'
-                self.content1.append(data)
+                if '在线人数' in data:  # 在线人数1 1数人线在
+                    data = data[4:-1:1]
+                    self.lable1.setText(f'当前在线人数：{str(data)}')
+                else:
+                    self.content1.append(data)
+                    self.content1.moveCursor(self.content1.textCursor().End)
             except Exception as error:
                 self.content1.append(f'与服务器断开连接...\n{error}')
+                self.content1.moveCursor(self.content1.textCursor().End)
                 break
 
     def sendMsg(self):
@@ -170,7 +176,10 @@ class TCPclient(QWidget):
 
     # 主窗体关闭进程终止
     def closeEvent(self, event):
-        self.closeWithserver()
+        try:
+            self.closeWithserver()
+        except Exception:
+            pass
         sys.exit(app.exec_())
 
 if __name__ == '__main__':
