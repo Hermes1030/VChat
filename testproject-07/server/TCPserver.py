@@ -79,8 +79,10 @@ class TCP_server:
         else:
             self.clients_name_ip[ address ] = name
             print(f'[{time.strftime("%X")} 通知]：客户端[{address}]创建了一个昵称：{name}')
-            Thread(target=self.sendUSERnum, args=(client, clients_socket)).start()
+
             try:
+                Thread(target=self.sendUSERnum, args=(client, clients_socket)).start()
+                Thread(target=self.sendUSERlist, args=(clients_socket,)).start()
                 recvinfo = '[系统消息' + ' ' + time.strftime("%H:%M:%S") + ']\n' + f'欢迎{name}加入聊天室。'
                 client.send(recvinfo.encode())
             except Exception as error:
@@ -108,12 +110,11 @@ class TCP_server:
                                 print(f'[{time.strftime("%H:%M:%S")} 错误]：消息发送失败[{error}]来自套接字：{i}')
 
     def sendUSERnum(self, client, clients_socket):
-        Thread(target=self.sendUSERlist, args=(clients_socket,)).start()
         while True:
+            time.sleep(1)
             if self.user_num != len(clients_socket):
                 try:
                     data = '在线人数' + str(len(clients_socket))
-                    time.sleep(1)
                     client.send(data.encode())
                     self.user_num = len(clients_socket)
                 except Exception:
