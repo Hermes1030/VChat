@@ -108,11 +108,58 @@
 # print(len(testlist))
 # print(testlist[0])
 
+# testlist = '在线人数5'
+# # print(testlist[::-1])
+# print(testlist[4::1])
 
+# userlist = {('127.0.0.1', 49768): 'user1', ('127.0.0.1', 49769): 'user2'}
+# data = '列表用户|'
+# for user_name in userlist.keys():
+#     data += str(userlist[user_name]) + '[' + str(user_name)[2:-1:] + ']' + '|'
+# print('正序：', data)
+# sa = ''
+# for i in data:
+#     if i == "'" or i == ",":
+#         continue
+#     elif i == ' ':
+#         i = ':'
+#         sa += i
+#     else:
+#         sa += i
+# print(sa)
+# data = data[::-1]
+# print('倒叙：', data)
 
+# for i in data:
+#     if i == '|':
+#         continue
+#     else i == ''
 
-
-testlist = '在线人数5'
-# print(testlist[::-1])
-print(testlist[4::1])
+# data = '列表用户|user1[127.0.0.1:49768]|user2[127.0.0.1:49769]|'
+# # for i in data[4::]:
+# #     # print(i, end='')
+# s = ''
+# list = []
+# list2 = []
+# for i in data[4::]:
+#     if i == '|':
+#         continue
+#     elif i == ']':
+#         i = ']\n'
+#         s += i
+#         list.append(s[:-1:])
+#         s = ''
+#     else:
+#         s += i
+# print('list:', list)
+# list2 = ['user1[127.0.0.1:49768]', 'user2[127.0.0.1:49769]']
+# # list2 = list
+# list2.append('1')
+# print('list2:', list2)
+# if list2 == list:
+#     print('==')
+# elif list2 != list:
+#     print('!=')
+# else:
+#     print('error')
 

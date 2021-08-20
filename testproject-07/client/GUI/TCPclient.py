@@ -6,9 +6,10 @@ import time
 import sys
 import socket
 
+
 class TCPclient(QWidget):
     def __init__(self):
-        QWidget.__init__(self)
+        QWidget.__init__(self, )
         #  GUI
         self.setGeometry(450, 200, 765, 415)
         self.setWindowTitle('多人聊天室')
@@ -19,7 +20,6 @@ class TCPclient(QWidget):
         # 调用方法
         self.change_gui()
         self.add_gui()
-
 
     def add_gui(self):
         #  消息框
@@ -41,25 +41,25 @@ class TCPclient(QWidget):
         # self.message2.setInputMask('000.000.000.000;')
         self.message2.setFont(QFont('微软雅黑', 11))
         self.message2.setGeometry(590, 60, 160, 25)
-        self.list1 = ['0.0.0.0', '127.0.0.2', '127.0.0.1' ]
+        self.list1 = [ '0.0.0.0', '127.0.0.2', '127.0.0.1' ]
         self.IP = QCompleter(self.list1)
         self.message2.setCompleter(self.IP)
         #  用户列表框
-        self.list = QListView(self)
+        self.list1 = QListView(self)
         self.data = QStringListModel()
         self.qList = [ '无用户' ]
         self.data.setStringList(self.qList)
-        self.list.setModel(self.data)
-        self.list.setFont(QFont('微软雅黑', 10))
-        self.list.setGeometry(590, 120, 160, 285)
-        self.list.setEditTriggers(QAbstractItemView.NoEditTriggers)     # 用户列表不可编辑
+        self.list1.setModel(self.data)
+        self.list1.setFont(QFont('微软雅黑', 10))
+        self.list1.setGeometry(590, 120, 160, 285)
+        self.list1.setEditTriggers(QAbstractItemView.NoEditTriggers)  # 用户列表不可编辑
         #  输入框
         self.message1 = QLineEdit(self)
         self.message1.setPlaceholderText(u'输入发送的内容')
         self.message1.setGeometry(10, 320, 560, 85)
         self.message1.setFont(QFont('微软雅黑', 14))
         self.message1.setAlignment(Qt.AlignTop)
-        self.message1.returnPressed.connect(self.sendMsg)             # 回车触发
+        self.message1.returnPressed.connect(self.sendMsg)  # 回车触发
         #  清屏按钮
         self.button1 = QPushButton('清屏', self)
         self.button1.setFont(QFont('微软雅黑', 10, ))
@@ -131,12 +131,16 @@ class TCPclient(QWidget):
 
     def recvMsg(self):
         while True:
-            time.sleep(0.1)
+            time.sleep(0.5)
             try:
                 data = self.client.recv(1024).decode() + '\n'
-                if '在线人数' in data:  # 在线人数1 1数人线在
-                    data = data[4:-1:1]
-                    self.lable1.setText(f'当前在线人数：{str(data)}')
+                if '在线人数' in data:
+                    self.setUserFlage(data)
+                elif '列表用户' in data:
+                    userlit = self.dateUserlist(data[:-1:])
+                    self.data1 = QStringListModel()
+                    self.qList1 = userlit
+                    self.data.setStringList(self.qList1)
                 else:
                     self.content1.append(data)
                     self.content1.moveCursor(self.content1.textCursor().End)
@@ -163,6 +167,30 @@ class TCPclient(QWidget):
                     self.closeWithserver()
             self.message1.clear()
 
+    def dateUserlist(self, data):
+        # 列表用户|user1[127.0.0.1:49768]|user2[127.0.0.1:49769]|
+        s = ''
+        list = [ ]
+        try:
+            for i in data[ 4:: ]:
+                if i == '|':
+                    continue
+                elif i == ']':
+                    i = ']\n'
+                    s += i
+                    list.append(s[ :-1: ])
+                    s = ''
+                else:
+                    s += i
+        except Exception:
+            pass
+
+        return list
+
+    def setUserFlage(self,data):
+        data = data[ 4:-1:1 ]
+        self.lable1.setText(f'当前在线人数：{str(data)}')
+
     def work_thread(self):
         Thread(target=self.close_btn).start()
         Thread(target=self.send_btn).start()
@@ -181,6 +209,7 @@ class TCPclient(QWidget):
         except Exception:
             pass
         sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

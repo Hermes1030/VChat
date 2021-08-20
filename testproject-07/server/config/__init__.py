@@ -32,9 +32,38 @@ def delete_info(clients_socket, clients_name_ip, address, client):
 
     return clients_socket, clients_name_ip
 
+def user_list(userlist):
+    data = '列表用户|'
+    sa = ''
+    for user_name in userlist.keys():
+        data += str(userlist[ user_name ]) + '[' + str(user_name)[ 2:-1: ] + ']' + '|'
+    for i in data:
+        if i == "'" or i == ",":
+            continue
+        elif i == ' ':
+            i = ':'
+            sa += i
+        else:
+            sa += i
 
+    # 列表用户|user1[127.0.0.1:49768]|user2[127.0.0.1:49769]|
+    s = ''
+    list_ = [ ]
+    try:
+        for i in data[ 4:: ]:
+            if i == '|':
+                continue
+            elif i == ']':
+                i = ']\n'
+                s += i
+                list_.append(s[ :-1: ])
+                s = ''
+            else:
+                s += i
+    except Exception:
+        pass
 
-
+    return sa, list_
 
 #  保存聊天记录
 #  保存日志

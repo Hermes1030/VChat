@@ -1,5 +1,6 @@
 import socket  # 网络套接字
 import time  # 时间戳
+import operator
 from threading import Thread  # 线程模块
 from config import *
 
@@ -18,8 +19,10 @@ class TCP_server:
         self.bind_tcp()
 
         #  客户端套接字，套接字对应的name
-        self.clients_socket = [ ]
+        self.clients_socket = []
         self.clients_name_ip = {}
+        self.user_list = []
+        self.user_num = 0
 
         #  执行连接客户端方法
         self.get_client()
@@ -102,20 +105,43 @@ class TCP_server:
                             try:
                                 i.send((address[ 0 ] + ':' + str(address[ 1 ]) + ' ' + str(f'[{clients_name_ip[ address ]}]') + ' ' + time.strftime("%H:%M:%S") + '\n' + recvMSG).encode())
                             except Exception as error:
-                                print(f'[{time.strftime("%X")} 错误]：消息发送失败[{error}]来自套接字：{i}')
+                                print(f'[{time.strftime("%H:%M:%S")} 错误]：消息发送失败[{error}]来自套接字：{i}')
 
     def sendUSERnum(self, client, clients_socket):
+        Thread(target=self.sendUSERlist, args=(clients_socket,)).start()
         while True:
-            try:
-                data = '在线人数' + str(len(clients_socket))
-                time.sleep(1.5)
-                client.send(data.encode())
-            except Exception:
-                break
+            if self.user_num != len(clients_socket):
+                try:
+                    data = '在线人数' + str(len(clients_socket))
+                    time.sleep(1)
+                    client.send(data.encode())
+                    self.user_num = len(clients_socket)
+                except Exception:
+                    break
+
+    def sendUSERlist(self, clients_socket,):
+        while True:
+            #  传入
+            data, list_ = user_list(self.clients_name_ip)
+            time.sleep(1)
+            #  分析
+            if operator.eq(list_, self.user_list):
+                continue
+            else:
+                #  传输信息区
+                for clients in clients_socket:
+                    try:
+                        clients.send(data.encode())
+                    except Exception as error:
+                        print(f'[{time.strftime("%H:%M:%S")} 错误]：用户列表发送失败[{error}]来自套接字：{clients}')
+                        break
+                self.user_list = list_
 
     #  关闭套接字
     def close_client(self, client, address):
         delete_info(self.clients_socket, self.clients_name_ip, address, client)
+        if self.user_num >= 1:
+            self.user_num = self.user_num - 1
 
 if __name__ == '__main__':
     TCP_server()
