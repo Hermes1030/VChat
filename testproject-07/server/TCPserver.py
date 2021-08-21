@@ -81,7 +81,6 @@ class TCP_server:
             print(f'[{time.strftime("%X")} 通知]：客户端[{address}]创建了一个昵称：{name}')
 
             try:
-                Thread(target=self.sendUSERnum, args=(client, clients_socket)).start()
                 Thread(target=self.sendUSERlist, args=(clients_socket,)).start()
                 recvinfo = '[系统消息' + ' ' + time.strftime("%H:%M:%S") + ']\n' + f'欢迎{name}加入聊天室。'
                 client.send(recvinfo.encode())
@@ -109,17 +108,6 @@ class TCP_server:
                             except Exception as error:
                                 print(f'[{time.strftime("%H:%M:%S")} 错误]：消息发送失败[{error}]来自套接字：{i}')
 
-    def sendUSERnum(self, client, clients_socket):
-        while True:
-            time.sleep(1)
-            if self.user_num != len(clients_socket):
-                try:
-                    data = '在线人数' + str(len(clients_socket))
-                    client.send(data.encode())
-                    self.user_num = len(clients_socket)
-                except Exception:
-                    break
-
     def sendUSERlist(self, clients_socket,):
         while True:
             #  传入
@@ -136,13 +124,12 @@ class TCP_server:
                     except Exception as error:
                         print(f'[{time.strftime("%H:%M:%S")} 错误]：用户列表发送失败[{error}]来自套接字：{clients}')
                         break
+                self.user_list = []
                 self.user_list = list_
 
     #  关闭套接字
     def close_client(self, client, address):
         delete_info(self.clients_socket, self.clients_name_ip, address, client)
-        if self.user_num >= 1:
-            self.user_num = self.user_num - 1
 
 if __name__ == '__main__':
     TCP_server()

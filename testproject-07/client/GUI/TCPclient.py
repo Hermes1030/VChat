@@ -97,6 +97,43 @@ class TCPclient(QWidget):
             self.setFixedWidth(581)
             self.I = 1
 
+    def recvMsg(self):
+        while True:
+            time.sleep(0.5)
+            try:
+                data = self.client.recv(1024).decode() + '\n'
+                if '列表用户' in data:
+                    userlit = self.dateUserlist(data[:-1:])
+                    self.data1 = QStringListModel()
+                    self.qList1 = userlit
+                    self.data.setStringList(self.qList1)
+                    self.lable1.setText(f'当前在线人数：{len(self.qList1)}')
+                else:
+                    self.content1.append(data)
+                    self.content1.moveCursor(self.content1.textCursor().End)
+            except Exception as error:
+                self.content1.append(f'与服务器断开连接...\n{error}')
+                self.content1.moveCursor(self.content1.textCursor().End)
+                break
+
+    def sendMsg(self):
+        data = self.message1.text()
+        if self.lable2.text() != '服务器地址：':
+            if data == '#quit':
+                try:
+                    self.client.send(data.encode())
+                except Exception as error:
+                    self.content1.append(f'消息发送失败{error}')
+                else:
+                    self.closeWithserver()
+            else:
+                try:
+                    self.client.send(data.encode())
+                except Exception as error:
+                    self.content1.append(f'消息发送失败，错误信息{error}')
+                    self.closeWithserver()
+            self.message1.clear()
+
     def connectToserver(self):
         if len(self.lable2.text()) <= 7:
             IP = self.message2.text()
@@ -129,44 +166,6 @@ class TCPclient(QWidget):
             self.content1.append(f'当前未连接到服务器...\n错误描述：{error}')
             self.content1.moveCursor(self.content1.textCursor().End)
 
-    def recvMsg(self):
-        while True:
-            time.sleep(0.5)
-            try:
-                data = self.client.recv(1024).decode() + '\n'
-                if '在线人数' in data:
-                    self.setUserFlage(data)
-                elif '列表用户' in data:
-                    userlit = self.dateUserlist(data[:-1:])
-                    self.data1 = QStringListModel()
-                    self.qList1 = userlit
-                    self.data.setStringList(self.qList1)
-                else:
-                    self.content1.append(data)
-                    self.content1.moveCursor(self.content1.textCursor().End)
-            except Exception as error:
-                self.content1.append(f'与服务器断开连接...\n{error}')
-                self.content1.moveCursor(self.content1.textCursor().End)
-                break
-
-    def sendMsg(self):
-        data = self.message1.text()
-        if self.lable2.text() != '服务器地址：':
-            if data == '#quit':
-                try:
-                    self.client.send(data.encode())
-                except Exception as error:
-                    self.content1.append(f'消息发送失败{error}')
-                else:
-                    self.closeWithserver()
-            else:
-                try:
-                    self.client.send(data.encode())
-                except Exception as error:
-                    self.content1.append(f'消息发送失败，错误信息{error}')
-                    self.closeWithserver()
-            self.message1.clear()
-
     def dateUserlist(self, data):
         # 列表用户|user1[127.0.0.1:49768]|user2[127.0.0.1:49769]|
         s = ''
@@ -186,10 +185,6 @@ class TCPclient(QWidget):
             pass
 
         return list
-
-    def setUserFlage(self,data):
-        data = data[ 4:-1:1 ]
-        self.lable1.setText(f'当前在线人数：{str(data)}')
 
     def work_thread(self):
         Thread(target=self.close_btn).start()
