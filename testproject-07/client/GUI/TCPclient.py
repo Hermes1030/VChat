@@ -151,7 +151,7 @@ class TCPclient(QWidget):
 
         else:
             if '当前已经连接到' not in self.content1.toPlainText():
-                self.content1.append(f'当前已经连接到{self.message2.text()}')
+                self.content1.append(f'当前已经连接到{self.message2.text()}\n')
 
     def closeWithserver(self):
         try:

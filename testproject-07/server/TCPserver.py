@@ -22,7 +22,6 @@ class TCP_server:
         self.clients_socket = []
         self.clients_name_ip = {}
         self.user_list = []
-        self.user_num = 0
 
         #  执行连接客户端方法
         self.get_client()
@@ -35,13 +34,13 @@ class TCP_server:
         except Exception as error:
             print(f'绑定失败[{error}]')
         else:
-            print(f'端口绑定成功，地址：[{self.IP}:{self.PORT}],主机名[{self.HOSTNAME}]\n等待用户连接...')
+            print(f'[{time.strftime("%X")} 信息]端口绑定成功，地址：[{self.IP}:{self.PORT}],主机名[{self.HOSTNAME}]\n等待用户连接...')
 
     #  与客户端建立连接
     def get_client(self):
         while True:
             try:
-                #  accept方法将返回两个值:套接字（client),地址（address),赋给相应变量
+                #  accept方法将返回两个值:套接字（client),地址（address)
                 client, address = self.server.accept()
             except Exception as error:
                 print(f'[{time.strftime("%X")} 错误]：未能与客户端建立连接{error}')
@@ -64,10 +63,7 @@ class TCP_server:
                         print(f'[{time.strftime("%X")} 错误]：get_msg线程任务启动失败{error}')
                         delete_info(self.clients_socket, self.clients_name_ip, address, client)
                     else:
-                        print(f'[{time.strftime("%X")} 通知]：{address}连接成功，问候信息发送成功，消息接收线程启动成功。\n'
-                              f'>>>now clients_socket list:{self.clients_socket},'
-                              f'address list:{address},'
-                              f'clients_name_ip list:{self.clients_name_ip}')
+                        print(f'[{time.strftime("%X")} 通知]：{address}连接成功，问候信息发送成功，消息接收线程启动成功。')
 
     #  对客户端的消息处理
     def get_msg(self, client, clients_socket, clients_name_ip, address):
@@ -79,7 +75,6 @@ class TCP_server:
         else:
             self.clients_name_ip[ address ] = name
             print(f'[{time.strftime("%X")} 通知]：客户端[{address}]创建了一个昵称：{name}')
-
             try:
                 Thread(target=self.sendUSERlist, args=(clients_socket,)).start()
                 recvinfo = '[系统消息' + ' ' + time.strftime("%H:%M:%S") + ']\n' + f'欢迎{name}加入聊天室。'
@@ -98,16 +93,13 @@ class TCP_server:
                         break
                     else:
                         if recvMSG == '#quit':
+                            data = f'用户{address}下线'
                             print(f'[{time.strftime("%X")} 提示]：客户端[{address}]下线')
                             self.close_client(client, address)
                             break
-                        for i in clients_socket:
-                            time.sleep(0.1)
-                            try:
-                                i.send((address[ 0 ] + ':' + str(address[ 1 ]) + ' ' + str(f'[{clients_name_ip[ address ]}]') + ' ' + time.strftime("%H:%M:%S") + '\n' + recvMSG).encode())
-                            except Exception as error:
-                                print(f'[{time.strftime("%H:%M:%S")} 错误]：消息发送失败[{error}]来自套接字：{i}')
-
+                        #  调用广播消息的方法
+                        self.broadcasting(clients_socket, address, clients_name_ip, recvMSG)
+    #  发送用户列表
     def sendUSERlist(self, clients_socket,):
         while True:
             #  传入
@@ -126,6 +118,16 @@ class TCP_server:
                         break
                 self.user_list = []
                 self.user_list = list_
+
+    #  转发消息
+    def broadcasting(self, clients_socket, address, clients_name_ip, data):
+        for i in clients_socket:
+            time.sleep(0.1)
+            try:
+                i.send((address[ 0 ] + ':' + str(address[ 1 ]) + ' ' + str(
+                    f'[{clients_name_ip[ address ]}]') + ' ' + time.strftime("%H:%M:%S") + '\n' + data).encode())
+            except Exception as error:
+                print(f'[{time.strftime("%H:%M:%S")} 错误]：消息发送失败[{error}]来自：{i}')
 
     #  关闭套接字
     def close_client(self, client, address):
