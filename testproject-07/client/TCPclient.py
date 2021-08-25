@@ -66,15 +66,16 @@ class TCPclient(QWidget):
         self.message1.setAlignment(Qt.AlignTop)
         self.message1.returnPressed.connect(self.sendmsg)  # 回车触发
         #  清屏按钮
-        self.button1 = QPushButton('清屏', self)
+        self.button1 = QPushButton('clear', self)
         self.button1.setFont(QFont('微软雅黑', 10, ))
         self.button1.setGeometry(410, 375, 40, 30)
         self.button1.setStyleSheet('border:1px solid black')
         self.button1.clicked.connect(self.cleartext)
         # self.button1.close()
         #  扩展按钮
-        self.button2 = QPushButton('↑', self)
+        self.button2 = QPushButton('more', self)
         self.button2.setGeometry(450, 375, 40, 30)
+        self.button2.setFont(QFont('微软雅黑', 8, ))
         self.button2.setStyleSheet('border:1px solid black')
         self.button2.clicked.connect(self.change_gui)
         #  连接按钮
@@ -89,8 +90,8 @@ class TCPclient(QWidget):
         self.button4.setGeometry(670, 90, 80, 25)
         self.button4.setStyleSheet('border:1px solid black')
         #  发送按钮
-        self.button5 = QPushButton('发送', self)
-        self.button5.setFont(QFont('微软雅黑', 12, ))
+        self.button5 = QPushButton('发送（Enter）', self)
+        self.button5.setFont(QFont('微软雅黑', 8, ))
         self.button5.setGeometry(490, 375, 80, 30)
         self.button5.setStyleSheet('border:1px solid black')
 
