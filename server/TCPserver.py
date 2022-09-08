@@ -98,19 +98,19 @@ class TCP_server:
                 #  开始循环监听消息
                 while True:
                     try:
-                        recvmsg = client.recv(1024).decode()
+                        recvMSG = client.recv(1024).decode()
                     except Exception as error:
                         save_logs('close_client', error, address)
                         self.closeclient(client, address)
                         break
                     else:
-                        save_recvmsg(address, recvmsg)
-                        if recvmsg == '#quit':
+                        save_recvmsg(address, recvMSG)
+                        if recvMSG == '#quit':
                             save_logs('leave_client', '', address)
                             self.closeclient(client, address)
                             break
                         #  广播消息（向所有在线用户转发消息）
-                        self.broadcasting(clients_socket, address, clients_name_ip, recvmsg)
+                        self.broadcasting(clients_socket, address, clients_name_ip, recvMSG)
 
     #  发送用户列表
     def senduserlist(self, clients_socket, ):
@@ -152,7 +152,8 @@ class TCP_server:
         for i in clients_socket:
             time.sleep(0.1)
             try:
-                i.send((address[ 0 ] + ':' + str(address[ 1 ]) + ' ' + str(f'[{clients_name_ip[ address ]}]') + ' ' + time.strftime("%H:%M:%S") + '\n' + data).encode())
+                i.send((address[ 0 ] + ':' + str(address[ 1 ]) + ' ' + str(
+                    f'[{clients_name_ip[ address ]}]') + ' ' + time.strftime("%H:%M:%S") + '\n' + data).encode())
             except Exception as error:
                 save_logs('send_error', error, '')
 
